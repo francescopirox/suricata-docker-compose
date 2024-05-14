@@ -1,0 +1,45 @@
+version: "3"
+
+services:
+  suricata:
+    build: 
+      context: ./suricata
+      dockerfile: Dockerfile
+    hostname: suricata
+    volumes:
+    - /var/log/suricata:/var/log/suricata
+    - ./rules/rules.rules:/var/lib/suricata/rules/my.rules
+    entrypoint: /tmp/docker-entrypoint.sh
+    privileged: true
+    networks:
+     a00_ext:
+      ipv4_address: 192.168.123.123
+     a10_net1:
+      
+  service:
+    build: 
+      context: ./service
+      dockerfile: Dockerfile
+    hostname: service
+    privileged: true
+    networks:
+     a10_net1:
+      ipv4_address: 10.0.0.2
+
+
+networks:
+  a00_ext:
+   driver: bridge
+   ipam:
+    driver: default
+    config:
+     - subnet: 192.168.123.0/24
+
+  a10_net1:
+   driver: macvlan
+   driver_opts:
+     parent: example-net.10
+   ipam:
+    driver: default
+    config:
+     - subnet: 10.0.0.0/24
